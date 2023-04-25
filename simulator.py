@@ -8,7 +8,7 @@ signs = [
     [1, -1],
 ]
 inertia = 0.8
-btarupt = 10  # Brandan "Think Award" Roachell units per timestep
+btarupt = 0.1  # Brandan "Think Award" Roachell units per timestep
 
 
 #    _____
@@ -66,10 +66,25 @@ class Robot:
         return math.sqrt((x_goal - self.x) ** 2 + (y_goal - self.y) ** 2)
 
 
-# Create Random Population
-# Training
-#   Test distance from goal after x timesteps
-#       distance is found by calling the drive function once per timestep and evaluating odom at the end
-#   Take best networks, evolve them
-#   Every Y generations, save pkl
-#   Random goal each generation
+class Simple_Robot:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.v = [0 for i in range(2)]
+
+    def motor_drive(self, speeds):
+        for i in range(len(self.v)):
+            self.v[i] = speeds[i]
+        self.odom()
+
+    # Hey you did a move
+    def odom(self):
+        self.x += (self.v[0]) * btarupt
+        self.y += (self.v[1]) * btarupt
+        # self.a += (np.sum(self.v) * btarupt) / self.radius
+
+    def get_status(self, x_goal, y_goal):
+        return (x_goal - self.x, y_goal - self.y)
+
+    def get_fitness(self, x_goal, y_goal):
+        return math.sqrt((x_goal - self.x) ** 2 + (y_goal - self.y) ** 2)

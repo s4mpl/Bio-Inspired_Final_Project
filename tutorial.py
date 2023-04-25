@@ -14,17 +14,18 @@ import math
 
 
 def eval_genomes(genomes, config):
-    theta = rand.random() * 2 * math.pi
-    goal_x = math.cos(theta)
-    goal_y = math.sin(theta)
+    # theta = rand.random() * 2 * math.pi
+    goal_x = math.cos(0.5)
+    goal_y = math.sin(0.5)
     for genome_id, genome in genomes:
         net = neat.nn.FeedForwardNetwork.create(genome, config)
-        bot = simulator.Robot(0, 0, 0)
+        bot = simulator.Simple_Robot(0, 0)
         for i in range(10):
             output = net.activate(bot.get_status(goal_x, goal_y))
             # print(output)
             bot.motor_drive(output)
         genome.fitness = 1 - bot.get_fitness(goal_x, goal_y)
+        # print(f"({goal_x}, {goal_y}):({bot.x}, {bot.y})      {genome.fitness}")
 
 
 def run(config_file):
@@ -47,7 +48,7 @@ def run(config_file):
     p.add_reporter(neat.Checkpointer(5))
 
     # Run for up to 300 generations.
-    winner = p.run(eval_genomes, 25)
+    winner = p.run(eval_genomes, 50)
 
     # Display the winning genome.
     print("\nBest genome:\n{!s}".format(winner))
@@ -62,15 +63,8 @@ def run(config_file):
     node_names = {
         -1: "X",
         -2: "Y",
-        -3: "V1",
-        -4: "V2",
-        -5: "V3",
-        -6: "V4",
-        -7: "A",
         0: "M1",
         1: "M2",
-        2: "M3",
-        3: "M4",
     }
     visualize.draw_net(config, winner, True, node_names=node_names)
     # visualize.draw_net(config, winner, True, node_names=node_names, prune_unused=True)
