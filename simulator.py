@@ -9,7 +9,7 @@ signs = [
     [1, -1],
 ]
 inertia = 0.8
-btarupt = 0.1  # Brandan "Think Award" Roachell units per timestep
+btarupt = 1  # Brandan "Think Award" Roachell units per timestep
 
 
 #    _____
@@ -88,5 +88,5 @@ class Simple_Robot:
     def get_status(self, x_goal, y_goal):
         return (x_goal - self.x, y_goal - self.y)
 
-    def get_fitness(self, x_goal, y_goal):
+    def get_distance(self, x_goal, y_goal):
         return math.sqrt((x_goal - self.x) ** 2 + (y_goal - self.y) ** 2)
