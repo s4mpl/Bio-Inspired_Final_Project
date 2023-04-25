@@ -10,13 +10,15 @@ import simulator
 import random as rand
 import math
 
-# 2-input XOR inputs and expected outputs.
-
 
 def eval_genomes(genomes, config):
-    # theta = rand.random() * 2 * math.pi
-    goal_x = math.cos(0.5)
-    goal_y = math.sin(0.5)
+    theta = rand.random() * 2 * math.pi
+    goal_x = math.cos(theta)
+    goal_y = math.sin(theta)
+    # goal_x = rand.random()
+    # goal_y = rand.random()
+    # goal_x = 1
+    # goal_y = -0.75
     for genome_id, genome in genomes:
         net = neat.nn.FeedForwardNetwork.create(genome, config)
         bot = simulator.Simple_Robot(0, 0)
@@ -26,6 +28,7 @@ def eval_genomes(genomes, config):
             bot.motor_drive(output)
         genome.fitness = 1 - bot.get_fitness(goal_x, goal_y)
         # print(f"({goal_x}, {goal_y}):({bot.x}, {bot.y})      {genome.fitness}")
+    # input()
 
 
 def run(config_file):
@@ -45,10 +48,10 @@ def run(config_file):
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
-    p.add_reporter(neat.Checkpointer(5))
+    # p.add_reporter(neat.Checkpointer(5))
 
     # Run for up to 300 generations.
-    winner = p.run(eval_genomes, 50)
+    winner = p.run(eval_genomes, 500)
 
     # Display the winning genome.
     print("\nBest genome:\n{!s}".format(winner))
@@ -70,9 +73,6 @@ def run(config_file):
     # visualize.draw_net(config, winner, True, node_names=node_names, prune_unused=True)
     visualize.plot_stats(stats, ylog=False, view=True)
     visualize.plot_species(stats, view=True)
-
-    p = neat.Checkpointer.restore_checkpoint("neat-checkpoint-4")
-    p.run(eval_genomes, 10)
 
 
 if __name__ == "__main__":

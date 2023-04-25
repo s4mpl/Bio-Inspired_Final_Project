@@ -1,6 +1,7 @@
 import numpy as np
 import math
 
+
 signs = [
     [-1, 1],
     [-1, -1],
@@ -75,6 +76,7 @@ class Simple_Robot:
     def motor_drive(self, speeds):
         for i in range(len(self.v)):
             self.v[i] = speeds[i]
+            self.v[i] = max(min(self.v[i], 1), -1)
         self.odom()
 
     # Hey you did a move
