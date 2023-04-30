@@ -3,7 +3,6 @@ Robot implimentation
 """
 
 import os
-
 import neat
 import visualize
 import simulator
@@ -12,29 +11,29 @@ import math
 
 
 def eval_genomes(genomes, config):
+    num_trials = 5
     for genome_id, genome in genomes:
         genome.fitness = 0
-    for j in range(5):
+    for j in range(num_trials):
         dist = (rand.random() - 0) * 10
         if dist == 0:
             dist = 0.000001
         theta = rand.random() * 2 * math.pi
+
         goal_x = math.cos(theta) * dist
         goal_y = math.sin(theta) * dist
+        goal_a = rand.random() * 2 * math.pi
         for genome_id, genome in genomes:
             net = neat.nn.FeedForwardNetwork.create(genome, config)
-            bot = simulator.Simple_Robot(0, 0)
+            bot = simulator.Simple_Robot(0, 0, 0)
             for i in range(10):
-                output = net.activate(bot.get_status(goal_x, goal_y))
+                output = net.activate(bot.get_status(goal_x, goal_y, goal_a))
                 bot.motor_drive(output)
             genome.fitness = (
-                genome.fitness + 1 - (bot.get_distance(goal_x, goal_y) / dist)
+                genome.fitness + 1 - (bot.get_fitness(goal_x, goal_y, goal_a, dist))
             )
     for genome_id, genome in genomes:
-        genome.fitness /= 5
-
-    # print(f"({goal_x}, {goal_y}):({bot.x}, {bot.y})     {dist}:{genome.fitness}")
-    # input()
+        genome.fitness /= num_trials
 
 
 def run(config_file):
@@ -54,9 +53,9 @@ def run(config_file):
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
-    # p.add_reporter(neat.Checkpointer(5))
+    p.add_reporter(neat.Checkpointer(10))
 
-    # Run for up to 300 generations.
+    # Run for up to x generations.
     winner = p.run(eval_genomes, 100)
 
     # Display the winning genome.
@@ -72,12 +71,20 @@ def run(config_file):
     node_names = {
         -1: "X",
         -2: "Y",
+        -3: "Δθ",
+        -4: "θ",
+        -5: "V1",
+        -6: "V2",
+        -7: "V3",
+        -8: "V4",
         0: "M1",
         1: "M2",
+        2: "M3",
+        3: "M4",
     }
-    visualize.draw_net(config, winner, True, node_names=node_names)
-    # visualize.draw_net(config, winner, True, node_names=node_names, prune_unused=True)
-    visualize.plot_stats(stats, ylog=False, view=True)
+    # visualize.draw_net(config, winner, True, node_names=node_names)
+    visualize.draw_pruned(config, winner, True, node_names=node_names)
+    visualize.plot_best(stats, ylog=False, view=True)
     visualize.plot_species(stats, view=True)
 
 

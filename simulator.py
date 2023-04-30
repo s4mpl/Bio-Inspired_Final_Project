@@ -1,61 +1,43 @@
 import numpy as np
 import math
+import random as rand
 
 
-signs = [
-    [-1, 1],
-    [-1, -1],
-    [1, 1],
-    [1, -1],
-]
-inertia = 0.8
+inertia = 0.1
 btarupt = 1  # Brandan "Think Award" Roachell units per timestep
 
 
-#    _____
-#   /     \
-#   |      |
-#   \_____/
-#
-
-
-class Robot:
+class Simple_Robot:
     def __init__(self, x, y, a):
         self.x = x
         self.y = y
-        self.a = a
         self.v = [0 for i in range(4)]
-        self.radius = 0.05
-
-    def x_drive(self, x_pow, y_pow, a_pow):
-        x_adj = -y_pow * math.cos(self.a) - x_pow * math.sin(self.a)
-        y_adj = -y_pow * math.sin(self.a) - x_pow * math.cos(self.a)
-        for v, i in enumerate(self.v):
-            v = v * inertia + (a_pow + (signs[i][0] * y_adj) + (signs[i][1] * x_adj))
-            v = max(min(v, 100), -100)
-        self.odom()
+        self.a = (rand.random() * 2 * math.pi) if a == -1 else a
+        self.radius = 0.5
 
     def motor_drive(self, speeds):
-        for v, i in enumerate(self.v):
-            v = v * inertia + speeds[i]
-            v = max(min(v, 1), -1)
+        for i in range(len(self.v)):
+            self.v[i] = max(min(speeds[i], 1), -1) + (inertia * self.v[i])
         self.odom()
 
     # Hey you did a move
     def odom(self):
         self.x += (
-            # math.cos(self.a + (math.pi / 2)) * (self.v[0] - self.v[2])
-            # + math.sin(self.a + (math.pi / 2)) * (self.v[3] - self.v[1])
-            self.v[0]
-            - self.v[2]
+            math.cos(self.a + (math.pi / 2)) * (self.v[0] - self.v[2])
+            + math.sin(self.a + (math.pi / 2)) * (self.v[1] - self.v[3])
         ) * btarupt
-        self.y += (self.v[3] - self.v[1]) * btarupt
-        # self.a += (np.sum(self.v) * btarupt) / self.radius
+        self.y += (
+            math.sin(self.a + (math.pi / 2)) * (self.v[0] - self.v[2])
+            + math.cos(self.a + (math.pi / 2)) * (self.v[3] - self.v[1])
+        ) * btarupt
+        self.a += (np.average(self.v) * btarupt) / self.radius
+        self.a = self.get_angle_diff(0)
 
-    def get_status(self, x_goal, y_goal):
+    def get_status(self, x_goal, y_goal, a_goal):
         return (
             x_goal - self.x,
             y_goal - self.y,
+            self.get_angle_diff(a_goal),
             self.a,
             self.v[0],
             self.v[1],
@@ -63,30 +45,16 @@ class Robot:
             self.v[3],
         )
 
-    def get_fitness(self, x_goal, y_goal):
-        return math.sqrt((x_goal - self.x) ** 2 + (y_goal - self.y) ** 2)
+    # Include a big bonus for being there already
+    def get_fitness(self, x_goal, y_goal, a_goal, total):
+        dist_fit = math.sqrt((x_goal - self.x) ** 2 + (y_goal - self.y) ** 2) / total
+        angle_fit = abs(self.get_angle_diff(a_goal) / (4 * math.pi))
+        ret = dist_fit + angle_fit
+        if ret < 0.05:
+            ret = -0.5
+        return ret
 
-
-class Simple_Robot:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        self.v = [0 for i in range(2)]
-
-    def motor_drive(self, speeds):
-        for i in range(len(self.v)):
-            self.v[i] = speeds[i]
-            self.v[i] = max(min(self.v[i], 1), -1)
-        self.odom()
-
-    # Hey you did a move
-    def odom(self):
-        self.x += (self.v[0]) * btarupt
-        self.y += (self.v[1]) * btarupt
-        # self.a += (np.sum(self.v) * btarupt) / self.radius
-
-    def get_status(self, x_goal, y_goal):
-        return (x_goal - self.x, y_goal - self.y)
-
-    def get_distance(self, x_goal, y_goal):
-        return math.sqrt((x_goal - self.x) ** 2 + (y_goal - self.y) ** 2)
+    def get_angle_diff(self, a_goal):
+        if abs(a_goal - self.a) < math.pi:
+            return a_goal - self.a
+        return (a_goal - self.a) - (2 * math.pi)
