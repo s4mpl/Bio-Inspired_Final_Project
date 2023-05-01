@@ -56,10 +56,10 @@ def run(config_file):
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
-    p.add_reporter(neat.Checkpointer(10))
+    p.add_reporter(neat.Checkpointer(1))
 
     # Run for up to x generations.
-    winner = p.run(eval_genomes, 100)
+    winner = p.run(eval_genomes, 10)
 
     # Display the winning genome.
     print("\nBest genome:\n{!s}".format(winner))
