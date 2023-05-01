@@ -1,4 +1,5 @@
 #include "autons.h"
+#include "odom.h"
 #include "robot_config.h"
 
 /**
@@ -67,10 +68,10 @@ void opcontrol() {
   int driveMode = 0;
   DriveTrain drive_train = DriveTrain::get_instance();
   Printer printer(.1);
+  double x = 24, y = 0, a = 0;
   while (true) {
     driveMode %= 3;
 
-    double x = -.2, y = -.2, a = 0;
     // Drive Code:
 
     // testing encoder stuff
@@ -83,15 +84,27 @@ void opcontrol() {
       printf("middle encoder: %d\n",
              encoder_middle.get_value()); // should print num ticks
       */
-      printf("x: %lf, y: %lf, a: %lf\n", x, y, a);
-      // printf("x: %lf, y: %lf, a: %lf\n", x_cur / UNIT2IN, y_cur / UNIT2IN,
+      printf("Drivemode: %d\n", driveMode);
+      printf("  Goal: x: %lf, y: %lf\n", x, y);
+      printf("  Cur:  x: %lf, y: %lf\n", x_cur / UNIT2IN, y_cur / UNIT2IN);
+      printf("  AI:   x: %lf, y: %lf\n", x - (x_cur / UNIT2IN),
+             y - (y_cur / UNIT2IN));
       // a_cur);
     }
-    if (driveMode == 1)
-      while (!drive_train.AI_drive(x - x_cur, y - y_cur, a - a_cur)) {
+    if (driveMode == 1) {
+      // while (!drive_train.AI_drive(x - (x_cur / UNIT2IN), y - (y_cur /
+      // UNIT2IN),
+      //                              a - a_cur)) {
+      while (!drive_train.AI_drive(x - (x_cur / UNIT2IN), y - (y_cur / UNIT2IN),
+                                   a - a_cur)) {
         pros::delay(10);
+        // if (printer.is_nth()) {
+        //   printf("  AI:   x: %lf, y: %lf\n", x - x_cur, y - y_cur);
+        // }
       }
-    else if (driveMode == 0)
+      // printf("Done with band\n");
+      // drive_train.brake();
+    } else if (driveMode == 0)
       drive_train.field_oriented(
           controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X),
           controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y),

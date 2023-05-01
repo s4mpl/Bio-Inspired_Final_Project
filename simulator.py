@@ -3,7 +3,7 @@ import math
 import random as rand
 
 
-inertia = 0.1
+inertia = 0.4
 btarupt = 1  # Brandan "Think Award" Roachell units per timestep
 
 
@@ -22,14 +22,26 @@ class Simple_Robot:
 
     # Hey you did a move
     def odom(self):
-        self.x += (
-            math.cos(self.a + (math.pi / 2)) * (self.v[0] - self.v[2])
-            + math.sin(self.a + (math.pi / 2)) * (self.v[1] - self.v[3])
-        ) * btarupt
-        self.y += (
-            math.sin(self.a + (math.pi / 2)) * (self.v[0] - self.v[2])
-            + math.cos(self.a + (math.pi / 2)) * (self.v[3] - self.v[1])
-        ) * btarupt
+        if (self.a > 0 and self.a <= math.pi) or (
+            self.a > (2 * math.pi) and self.a <= (3 * math.pi)
+        ):
+            self.x += (
+                math.cos(self.a + (math.pi / 2)) * (self.v[0] - self.v[2])
+                - math.sin(self.a + (math.pi / 2)) * (self.v[1] - self.v[3])
+            ) * btarupt
+            self.y += (
+                -math.sin(self.a + (math.pi / 2)) * (self.v[0] - self.v[2])
+                - math.cos(self.a + (math.pi / 2)) * (self.v[3] - self.v[1])
+            ) * btarupt
+        else:
+            self.x += (
+                -math.cos(self.a + (math.pi / 2)) * (self.v[0] - self.v[2])
+                + math.sin(self.a + (math.pi / 2)) * (self.v[1] - self.v[3])
+            ) * btarupt
+            self.y += (
+                +math.sin(self.a + (math.pi / 2)) * (self.v[0] - self.v[2])
+                + math.cos(self.a + (math.pi / 2)) * (self.v[3] - self.v[1])
+            ) * btarupt
         self.a += (np.average(self.v) * btarupt) / self.radius
         self.a = self.get_angle_diff(0)
 

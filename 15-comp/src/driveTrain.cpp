@@ -1,5 +1,6 @@
 #include "driveTrain.h"
 #include "odom.h"
+#include "robot_config.h"
 #include <cmath>
 DriveTrain *DriveTrain::instance = NULL;
 
@@ -16,8 +17,8 @@ DriveTrain &DriveTrain::get_instance() {
 }
 
 bool DriveTrain::robot_oriented(double xDrive, double yDrive, double turn) {
-  if (printer.is_nth())
-    printf("X: %lf, Y: %lf, A: %lf\n", xDrive, yDrive, turn);
+  // if (printer.is_nth())
+  //   printf("X: %lf, Y: %lf, A: %lf\n", xDrive, yDrive, turn);
   frontRight.move_velocity(turn - yDrive + xDrive);
   backRight.move_velocity(turn - yDrive - xDrive);
   frontLeft.move_velocity(turn + yDrive + xDrive);
@@ -70,8 +71,8 @@ double DriveTrain::weight_calc(double input, double weight) {
 }
 
 bool DriveTrain::AI_drive(double xGoal, double yGoal, double aGoal) {
-  if (printer.is_nth())
-    printf("X: %lf, Y: %lf, A: %lf\n", xGoal, yGoal, aGoal);
+  // if (printer.is_nth())
+  //   printf("X: %lf, Y: %lf, A: %lf\n", xGoal, yGoal, aGoal);
   frontLeft.move_velocity(gauss_act(weight_calc(yGoal, 11.723) + 1.078));
   frontRight.move_velocity(
       exp_act(weight_calc(xGoal, 5.250) +
@@ -81,7 +82,12 @@ bool DriveTrain::AI_drive(double xGoal, double yGoal, double aGoal) {
                                  weight_calc(frontLeft.get_velocity(), 0.957) +
                                  0.668));
   odom_update();
-  return (aGoal || yGoal || xGoal);
+  // if (abs(yGoal - (y_cur / UNIT2IN)) < 5 && abs(xGoal - (x_cur / UNIT2IN)) <
+  // 5)
+  //   return true;
+  // return false;
+
+  return (xGoal || yGoal || aGoal);
 }
 
 void DriveTrain::brake() { robot_oriented(0, 0, 0); }

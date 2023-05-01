@@ -15,7 +15,7 @@ def eval_genomes(genomes, config):
     for genome_id, genome in genomes:
         genome.fitness = 0
     for j in range(num_trials):
-        dist = (rand.random() - 0) * 10
+        dist = (rand.random()) * 10
         if dist == 0:
             dist = 0.000001
         theta = rand.random() * 2 * math.pi
@@ -26,9 +26,12 @@ def eval_genomes(genomes, config):
         for genome_id, genome in genomes:
             net = neat.nn.FeedForwardNetwork.create(genome, config)
             bot = simulator.Simple_Robot(0, 0, 0)
-            for i in range(10):
+            for i in range(100):
                 output = net.activate(bot.get_status(goal_x, goal_y, goal_a))
                 bot.motor_drive(output)
+            # print(
+            #     f"({goal_x},{goal_y},{goal_a}) : ({bot.x},{bot.y},{bot.a})      {bot.get_fitness(goal_x, goal_y, goal_a, dist)}"
+            # )
             genome.fitness = (
                 genome.fitness + 1 - (bot.get_fitness(goal_x, goal_y, goal_a, dist))
             )
