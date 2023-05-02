@@ -26,4 +26,6 @@ public:
   double exp_act(double z);
   double cube_act(double z);
   double sig_act(double z);
+  double hat_act(double z);
+  double log_act(double z);
 };

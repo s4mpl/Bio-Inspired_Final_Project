@@ -52,6 +52,7 @@ bool DriveTrain::pivot_drive(double xDrive, double yDrive) {
   return field_oriented(xDrive, yDrive, turn);
 }
 
+double DriveTrain::cube_act(double z) { return pow(z, 3); }
 double DriveTrain::gauss_act(double z) {
   z = std::max(-3.4, std::min(3.4, z));
   return exp(pow(-5.0 * z, 2));
@@ -60,10 +61,14 @@ double DriveTrain::exp_act(double z) {
   z = std::max(-60.0, std::min(60.0, z));
   return exp(z);
 }
-double DriveTrain::cube_act(double z) { return pow(z, 3); }
 double DriveTrain::sig_act(double z) {
   z = std::max(-60.0, std::min(60.0, z * 5.0));
   return 1 / (1 + exp(-z));
+}
+double DriveTrain::hat_act(double z) { return std::max(0.0, 1 - abs(z)); }
+double DriveTrain::log_act(double z) {
+  z = std::max(1e-7, z);
+  return std::log(z);
 }
 
 double DriveTrain::weight_calc(double input, double weight) {
@@ -71,21 +76,28 @@ double DriveTrain::weight_calc(double input, double weight) {
 }
 
 bool DriveTrain::AI_drive(double xGoal, double yGoal, double aGoal) {
-  // if (printer.is_nth())
-  //   printf("X: %lf, Y: %lf, A: %lf\n", xGoal, yGoal, aGoal);
-  frontLeft.move_velocity(gauss_act(weight_calc(yGoal, 11.723) + 1.078));
-  frontRight.move_velocity(
-      exp_act(weight_calc(xGoal, 5.250) +
-              weight_calc(frontLeft.get_velocity(), 0.994) + 2.183));
-  backRight.move_velocity(cube_act(weight_calc(yGoal, -1.302) + 0.162));
-  backLeft.move_velocity(sig_act(weight_calc(xGoal, -5.496) +
-                                 weight_calc(frontLeft.get_velocity(), 0.957) +
-                                 0.668));
+  // BAD
+  // frontLeft.move_velocity(gauss_act(weight_calc(yGoal, 11.723) + 1.078));
+  // frontRight.move_velocity(
+  //     exp_act(weight_calc(xGoal, 5.250) +
+  //             weight_calc(frontLeft.get_velocity(), 0.994) + 2.183));
+  // backRight.move_velocity(cube_act(weight_calc(yGoal, -1.302) + 0.162));
+  // backLeft.move_velocity(sig_act(weight_calc(xGoal, -5.496) +
+  //                                weight_calc(frontLeft.get_velocity(), 0.957)
+  //                                + 0.668));
+  frontLeft.move_velocity(log_act(2.469 + weight_calc(xGoal, -1.336)));
+  frontRight.move_velocity(sig_act(0.664 + weight_calc(yGoal, -3.336)));
+  backRight.move_velocity(hat_act(
+      -7.588 + weight_calc(xGoal, 1.437) + weight_calc(a_cur * DEG2RAD, 0.920) +
+      weight_calc(frontLeft.get_velocity(), 0.270) +
+      weight_calc(frontRight.get_velocity(), -0.389)));
+  backLeft.move_velocity(
+      exp_act(-1.067 + weight_calc(backRight.get_velocity(), 1.005) +
+              weight_calc(frontRight.get_velocity(), -1.295)));
+  // printf("1:%f\n2:%f\n3:%f\n4:%f", frontLeft.get_velocity(),
+  //        frontRight.get_velocity(), backRight.get_velocity(),
+  //        backLeft.get_velocity());
   odom_update();
-  // if (abs(yGoal - (y_cur / UNIT2IN)) < 5 && abs(xGoal - (x_cur / UNIT2IN)) <
-  // 5)
-  //   return true;
-  // return false;
 
   return (xGoal || yGoal || aGoal);
 }

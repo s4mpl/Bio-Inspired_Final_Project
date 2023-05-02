@@ -36,16 +36,17 @@ def eval_genomes(genomes, config):
         genome.fitness /= num_trials
 
 
-check = neat.Checkpointer.restore_checkpoint("checkpoints\\neat-checkpoint-9")
-check.run(eval_genomes, 1)
-num_best = 5
-# print(check.population.values())
-for genome in check.population.values():
-    if genome.fitness is None:
-        genome.fitness = 0
-bests = sorted(check.population.values(), key=lambda x: x.fitness, reverse=True)[
-    :num_best
-]
+check = neat.Checkpointer.restore_checkpoint("checkpoints\\neat-checkpoint-99")
+winner = check.run(eval_genomes, 1)
+# winner = check.best_genome
+# num_best = 5
+# # print(check.population.values())
+# for genome in check.population.values():
+#     if genome.fitness is None:
+#         genome.fitness = 0
+# bests = sorted(check.population.values(), key=lambda x: x.fitness, reverse=True)[
+#     :num_best
+# ]
 
 
 config = neat.Config(
@@ -55,48 +56,63 @@ config = neat.Config(
     neat.DefaultStagnation,
     "config",
 )
+node_names = {
+    -1: "X",
+    -2: "Y",
+    -3: "Δθ",
+    -4: "θ",
+    -5: "V1",
+    -6: "V2",
+    -7: "V3",
+    -8: "V4",
+    0: "M1",
+    1: "M2",
+    2: "M3",
+    3: "M4",
+}
+
+visualize.draw_pruned(config, winner, True, node_names=node_names)
+
+# nets = [neat.nn.FeedForwardNetwork.create(winner, config) for winner in bests]
+# in_arr = [
+#     (0, 0, 3, 0, 0, 0, 0, 0),
+#     (0, 24, 3, 0, 0, 0, 0, 0),
+#     (24, 24, 3, 0, 0, 0, 0, 0),
+#     (24, 0, 3, 0, 0, 0, 0, 0),
+#     (24, -24, 3, 0, 0, 0, 0, 0),
+#     (0, -24, 3, 0, 0, 0, 0, 0),
+#     (-24, -24, 3, 0, 0, 0, 0, 0),
+#     (-24, 0, 3, 0, 0, 0, 0, 0),
+#     (-24, 24, 3, 0, 0, 0, 0, 0),
+# ]
 
 
-nets = [neat.nn.FeedForwardNetwork.create(winner, config) for winner in bests]
-in_arr = [
-    (0, 0, 3, 0, 0, 0, 0, 0),
-    (0, 24, 3, 0, 0, 0, 0, 0),
-    (24, 24, 3, 0, 0, 0, 0, 0),
-    (24, 0, 3, 0, 0, 0, 0, 0),
-    (24, -24, 3, 0, 0, 0, 0, 0),
-    (0, -24, 3, 0, 0, 0, 0, 0),
-    (-24, -24, 3, 0, 0, 0, 0, 0),
-    (-24, 0, 3, 0, 0, 0, 0, 0),
-    (-24, 24, 3, 0, 0, 0, 0, 0),
-]
+print("\nBest genome:\n{!s}".format(winner))
 
+# steps = 500
+# to_graph = [[[0 for i in range(steps + 1)] for j in range(3)] for k in range(num_best)]
+# cmap = cm.get_cmap("viridis")
+# for j in range(9):
+#     vals = in_arr[j]
+#     robots = [simulator.Simple_Robot(0, 0, 0) for k in range(num_best)]
+#     fig, axs = plt.subplots()
+#     for k, robot in enumerate(robots):
+#         for i in range(steps):
+#             output = nets[k].activate(robot.get_status(vals[0], vals[1], vals[2]))
+#             robot.motor_drive(output)
+#             to_graph[k][0][i + 1] = robot.x
+#             to_graph[k][1][i + 1] = robot.y
+#             to_graph[k][2][i + 1] = robot.a
+#         # Color graphs by angle
+#         points = np.array([to_graph[k][0], to_graph[k][1]]).T.reshape(-1, 1, 2)
+#         segments = np.concatenate([points[:-1], points[1:]], axis=1)
+#         norm = plt.Normalize(-math.pi, math.pi)
+#         lc = LineCollection(segments, cmap="hsv", norm=norm)
+#         lc.set_array(np.array(to_graph[k][2]))
+#         lc.set_linewidth(2)
+#         line = axs.add_collection(lc)
 
-# print("\nBest genome:\n{!s}".format(winner))
-
-steps = 100
-to_graph = [[[0 for i in range(steps + 1)] for j in range(3)] for k in range(num_best)]
-cmap = cm.get_cmap("viridis")
-for j in range(9):
-    vals = in_arr[j]
-    robots = [simulator.Simple_Robot(0, 0, 0) for k in range(num_best)]
-    fig, axs = plt.subplots()
-    for k, robot in enumerate(robots):
-        for i in range(steps):
-            output = nets[k].activate(robot.get_status(vals[0], vals[1], vals[2]))
-            robot.motor_drive(output)
-            to_graph[k][0][i + 1] = robot.x
-            to_graph[k][1][i + 1] = robot.y
-            to_graph[k][2][i + 1] = robot.a
-        # Color graphs by angle
-        points = np.array([to_graph[k][0], to_graph[k][1]]).T.reshape(-1, 1, 2)
-        segments = np.concatenate([points[:-1], points[1:]], axis=1)
-        norm = plt.Normalize(-math.pi, math.pi)
-        lc = LineCollection(segments, cmap="hsv", norm=norm)
-        lc.set_array(np.array(to_graph[k][2]))
-        lc.set_linewidth(2)
-        line = axs.add_collection(lc)
-
-    fig.colorbar(line, ax=axs)
-    axs.set_xlim(-30, 30)
-    axs.set_ylim(-30, 30)
-    plt.show()
+#     fig.colorbar(line, ax=axs, location="top")
+#     axs.set_xlim(-30, 30)
+#     axs.set_ylim(-30, 30)
+#     plt.show()
