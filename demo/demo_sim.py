@@ -12,15 +12,18 @@ from simulator import Simple_Robot
 SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 1080
 pygame.init()
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT)) # flags=pygame.NOFRAME
-pygame.display.set_caption('X-Drive Robot Simulation')
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))  # flags=pygame.NOFRAME
+pygame.display.set_caption("X-Drive Robot Simulation")
 clock = pygame.time.Clock()
 running = True
 paused = False
 
 font = pygame.font.SysFont("dejavusansmono", 18)
+
+
 def render_text(text: str):
     return font.render(text, 1, pygame.Color("coral"))
+
 
 # spawn entities
 robot = Simple_Robot(0, 0, 0)
@@ -39,18 +42,21 @@ while running:
             if event.key == pygame.K_p:
                 paused = not paused
         if event.type == pygame.MOUSEBUTTONUP:
-            target_position = ((pygame.mouse.get_pos()[0] - 960) / 10, (pygame.mouse.get_pos()[1] - 540) / 10)
+            target_position = (
+                (pygame.mouse.get_pos()[0] - 960) / 10,
+                (pygame.mouse.get_pos()[1] - 540) / 10,
+            )
 
     # convert dt to seconds by dividing by 1000
     dt = clock.tick() / 1000
-            
+
     screen.fill("#000000")
-    
+
     if paused:
         continue
 
-    robot.update()
     goal._pos = Vector2(target_position[0], target_position[1])
+    robot.update(goal._pos)
 
     robot.render(screen)
     goal.render(screen)
@@ -59,10 +65,15 @@ while running:
     s = pygame.Surface((400, 60), pygame.SRCALPHA)
     s.fill((0, 0, 0, 128))
     screen.blit(s, (0, 0))
-    fps_text = "{:<18}({:3.2f}, {:3.2f})".format("Target Position:", target_position[0], target_position[1])
+
+    fps_text = "{:<18}({:3.2f}, {:3.2f})".format("Current Position:", robot.x, robot.y)
     screen.blit(render_text(fps_text), (5, 10))
-    fps_text = "{:<18}{:3.2f} degrees".format("Target Angle:", target_angle)
+    fps_text = "{:<18}({:3.2f}, {:3.2f})".format(
+        "Target Position:", target_position[0], target_position[1]
+    )
     screen.blit(render_text(fps_text), (5, 30))
+    fps_text = "{:<18}{:3.2f} degrees".format("Target Angle:", target_angle)
+    screen.blit(render_text(fps_text), (5, 50))
     pygame.display.flip()
-    
+
 pygame.quit()

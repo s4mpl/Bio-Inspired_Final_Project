@@ -15,7 +15,7 @@ def eval_genomes(genomes, config):
     for genome_id, genome in genomes:
         genome.fitness = 0
     for j in range(num_trials):
-        dist = (rand.random()) * 10
+        dist = (rand.random()) * 100
         if dist == 0:
             dist = 0.000001
         theta = rand.random() * 2 * math.pi
@@ -56,10 +56,10 @@ def run(config_file):
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
-    p.add_reporter(neat.Checkpointer(1))
+    p.add_reporter(neat.Checkpointer(10))
 
     # Run for up to x generations.
-    winner = p.run(eval_genomes, 10)
+    winner = p.run(eval_genomes, 100)
 
     # Display the winning genome.
     print("\nBest genome:\n{!s}".format(winner))
