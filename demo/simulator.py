@@ -37,7 +37,7 @@ def eval_genomes(genomes, config):
 
 
 class Simple_Robot:
-    def __init__(self, x, y, a, file="neat-checkpoint-29"):
+    def __init__(self, x, y, a, file="neat-checkpoint-99"):
         self.x = x
         self.y = y
         self.v = [0 for i in range(4)]
@@ -54,33 +54,33 @@ class Simple_Robot:
         )
         self.net = neat.nn.FeedForwardNetwork.create(winner, config)
 
-    def motor_drive(self, speeds):
+    def motor_drive(self, speeds, dt):
         for i in range(len(self.v)):
             self.v[i] = max(min(speeds[i], 1), -1) + (inertia * self.v[i])
-        self.odom()
+        self.odom(dt)
 
     # Hey you did a move
-    def odom(self):
+    def odom(self, dt):
         if (self.a > 0 and self.a <= math.pi) or (
             self.a > (2 * math.pi) and self.a <= (3 * math.pi)
         ):
             self.x += (
                 math.cos(self.a + (math.pi / 2)) * (self.v[0] - self.v[2])
                 - math.sin(self.a + (math.pi / 2)) * (self.v[1] - self.v[3])
-            ) * btarupt
+            ) * btarupt * dt
             self.y += (
                 -math.sin(self.a + (math.pi / 2)) * (self.v[0] - self.v[2])
                 - math.cos(self.a + (math.pi / 2)) * (self.v[3] - self.v[1])
-            ) * btarupt
+            ) * btarupt * dt
         else:
             self.x += (
                 -math.cos(self.a + (math.pi / 2)) * (self.v[0] - self.v[2])
                 + math.sin(self.a + (math.pi / 2)) * (self.v[1] - self.v[3])
-            ) * btarupt
+            ) * btarupt * dt
             self.y += (
                 +math.sin(self.a + (math.pi / 2)) * (self.v[0] - self.v[2])
                 + math.cos(self.a + (math.pi / 2)) * (self.v[3] - self.v[1])
-            ) * btarupt
+            ) * btarupt * dt
         self.a += (np.average(self.v) * btarupt) / self.radius
         self.a = self.get_angle_diff(0)
 
@@ -106,10 +106,10 @@ class Simple_Robot:
         pos.center = (10 * self.x + 960, 10 * self.y + 540)
         draw.rect(surface, "green", pos)
 
-    def update(self, coords):
+    def update(self, coords, dt):
         # get new x and y value from model / robot odom
         output = self.net.activate(self.get_status(coords[0], coords[1], 0))
-        self.motor_drive(output)
+        self.motor_drive(output, dt)
 
 
 class Dummy_Robot:

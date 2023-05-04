@@ -29,7 +29,7 @@ def render_text(text: str):
 robot = Simple_Robot(0, 0, 0)
 goal = Circle((0, 0), (0, 0), (0, 0), 10, "red")
 
-target_position = (24, 0)
+target_position = (0, 0)
 target_angle = 0
 
 while running:
@@ -41,6 +41,9 @@ while running:
                 running = False
             if event.key == pygame.K_p:
                 paused = not paused
+            if event.key == pygame.K_r:
+                robot.x = 0
+                robot.y = 0
         if event.type == pygame.MOUSEBUTTONUP:
             target_position = (
                 (pygame.mouse.get_pos()[0] - 960) / 10,
@@ -56,7 +59,7 @@ while running:
         continue
 
     goal._pos = Vector2(target_position[0], target_position[1])
-    robot.update(goal._pos)
+    robot.update(goal._pos, 10 * dt)
 
     robot.render(screen)
     goal.render(screen)
