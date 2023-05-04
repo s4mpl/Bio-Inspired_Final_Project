@@ -44,6 +44,8 @@ while running:
             if event.key == pygame.K_r:
                 robot.x = 0
                 robot.y = 0
+                robot.a = 0
+                robot.v = [0, 0, 0, 0]
         if event.type == pygame.MOUSEBUTTONUP:
             target_position = (
                 (pygame.mouse.get_pos()[0] - 960) / 10,
