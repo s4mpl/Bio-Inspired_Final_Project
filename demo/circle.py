@@ -79,6 +79,6 @@ class Circle(Sprite):
         ref._vel = Circle.elastic_collide(ref._pos, self._pos, ref_vel, my_vel, ref._mass, self._mass)
         
     def render(self, surface):
-        pos = Rect(0, 0, 20, 20)
+        pos = Rect(0, 0, 50, 50)
         pos.center = (10 * self._pos.x + 960, 10 * self._pos.y + 540)
         draw.rect(surface, "red", pos, 1)

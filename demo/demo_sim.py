@@ -61,7 +61,7 @@ while running:
         continue
 
     goal._pos = Vector2(target_position[0], target_position[1])
-    robot.update(goal._pos, 10 * dt)
+    robot.update(goal._pos, 20 * dt)
 
     robot.render(screen)
     goal.render(screen)
