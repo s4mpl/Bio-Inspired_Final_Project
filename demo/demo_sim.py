@@ -44,8 +44,8 @@ while running:
             if event.key == pygame.K_r:
                 robot.x = 0
                 robot.y = 0
-                robot.a = 0
                 robot.v = [0, 0, 0, 0]
+                robot.a = 0
         if event.type == pygame.MOUSEBUTTONUP:
             target_position = (
                 (pygame.mouse.get_pos()[0] - 960) / 10,
@@ -61,13 +61,13 @@ while running:
         continue
 
     goal._pos = Vector2(target_position[0], target_position[1])
-    robot.update(goal._pos, 10 * dt)
+    robot.update(goal._pos, 50 * dt)
 
     robot.render(screen)
     goal.render(screen)
 
     # fps rect
-    s = pygame.Surface((400, 60), pygame.SRCALPHA)
+    s = pygame.Surface((400, 100), pygame.SRCALPHA)
     s.fill((0, 0, 0, 128))
     screen.blit(s, (0, 0))
 
@@ -77,8 +77,10 @@ while running:
         "Target Position:", target_position[0], target_position[1]
     )
     screen.blit(render_text(fps_text), (5, 30))
-    fps_text = "{:<18}{:3.2f} degrees".format("Target Angle:", target_angle)
+    fps_text = "{:<18}{:6.2f} degrees".format("Current Angle:", robot.a)
     screen.blit(render_text(fps_text), (5, 50))
+    fps_text = "{:<18}{:6.2f} degrees".format("Target Angle:", target_angle)
+    screen.blit(render_text(fps_text), (5, 70))
     pygame.display.flip()
 
 pygame.quit()
