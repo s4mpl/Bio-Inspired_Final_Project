@@ -61,7 +61,7 @@ while running:
         continue
 
     goal._pos = Vector2(target_position[0], target_position[1])
-    robot.update(goal._pos, 50 * dt)
+    robot.update(goal._pos, 10 * dt)
 
     robot.render(screen)
     goal.render(screen)
@@ -77,9 +77,9 @@ while running:
         "Target Position:", target_position[0], target_position[1]
     )
     screen.blit(render_text(fps_text), (5, 30))
-    fps_text = "{:<18}{:6.2f} degrees".format("Current Angle:", robot.a)
+    fps_text = "{:<18}{:6.2f} radians".format("Current Angle:", robot.a)
     screen.blit(render_text(fps_text), (5, 50))
-    fps_text = "{:<18}{:6.2f} degrees".format("Target Angle:", target_angle)
+    fps_text = "{:<18}{:6.2f} radians".format("Target Angle:", target_angle)
     screen.blit(render_text(fps_text), (5, 70))
     pygame.display.flip()
 

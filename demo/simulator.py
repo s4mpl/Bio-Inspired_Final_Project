@@ -10,6 +10,51 @@ inertia = 0.4
 btarupt = 1  # Brandan "Think Award" Roachell units per timestep
 
 
+def draw_rectangle(
+    x,
+    y,
+    width,
+    height,
+    color,
+    screen,
+    rotation=0,
+):
+    """Draw a rectangle, centered at x, y.
+
+    Arguments:
+      x (int/float):
+        The x coordinate of the center of the shape.
+      y (int/float):
+        The y coordinate of the center of the shape.
+      width (int/float):
+        The width of the rectangle.
+      height (int/float):
+        The height of the rectangle.
+      color (str):
+        Name of the fill color, in HTML format.
+    """
+    points = []
+
+    # The distance from the center of the rectangle to
+    # one of the corners is the same for each corner.
+    radius = math.sqrt((height / 2) ** 2 + (width / 2) ** 2)
+
+    # Get the angle to one of the corners with respect
+    # to the x-axis.
+    angle = math.atan2(height / 2, width / 2)
+
+    # Transform that angle to reach each corner of the rectangle.
+    angles = [angle, -angle + math.pi, angle + math.pi, -angle]
+
+    # Calculate the coordinates of each point.
+    for angle in angles:
+        y_offset = -1 * radius * math.sin(angle + rotation)
+        x_offset = radius * math.cos(angle + rotation)
+        points.append((x + x_offset, y + y_offset))
+
+    draw.polygon(screen, color, points)
+
+
 def eval_genomes(genomes, config):
     num_trials = 5
     for genome_id, genome in genomes:
@@ -40,7 +85,7 @@ class Simple_Robot:
     def __init__(self, x, y, a, file="neat-checkpoint-99"):
         self.x = x
         self.y = y
-        self.v = [0 for i in range(4)]
+        self.v = [0, 0, 0, 0]
         self.a = (rand.random() * 2 * math.pi) if a == -1 else a
         self.radius = 0.5
         check = neat.Checkpointer.restore_checkpoint(file)
@@ -65,22 +110,38 @@ class Simple_Robot:
             self.a > (2 * math.pi) and self.a <= (3 * math.pi)
         ):
             self.x += (
-                math.cos(self.a + (math.pi / 2)) * (self.v[0] - self.v[2])
-                - math.sin(self.a + (math.pi / 2)) * (self.v[1] - self.v[3])
-            ) * btarupt * dt
+                (
+                    math.cos(self.a + (math.pi / 2)) * (self.v[0] - self.v[2])
+                    - math.sin(self.a + (math.pi / 2)) * (self.v[1] - self.v[3])
+                )
+                * btarupt
+                * dt
+            )
             self.y += (
-                -math.sin(self.a + (math.pi / 2)) * (self.v[0] - self.v[2])
-                - math.cos(self.a + (math.pi / 2)) * (self.v[3] - self.v[1])
-            ) * btarupt * dt
+                (
+                    -math.sin(self.a + (math.pi / 2)) * (self.v[0] - self.v[2])
+                    - math.cos(self.a + (math.pi / 2)) * (self.v[3] - self.v[1])
+                )
+                * btarupt
+                * dt
+            )
         else:
             self.x += (
-                -math.cos(self.a + (math.pi / 2)) * (self.v[0] - self.v[2])
-                + math.sin(self.a + (math.pi / 2)) * (self.v[1] - self.v[3])
-            ) * btarupt * dt
+                (
+                    -math.cos(self.a + (math.pi / 2)) * (self.v[0] - self.v[2])
+                    + math.sin(self.a + (math.pi / 2)) * (self.v[1] - self.v[3])
+                )
+                * btarupt
+                * dt
+            )
             self.y += (
-                +math.sin(self.a + (math.pi / 2)) * (self.v[0] - self.v[2])
-                + math.cos(self.a + (math.pi / 2)) * (self.v[3] - self.v[1])
-            ) * btarupt * dt
+                (
+                    +math.sin(self.a + (math.pi / 2)) * (self.v[0] - self.v[2])
+                    + math.cos(self.a + (math.pi / 2)) * (self.v[3] - self.v[1])
+                )
+                * btarupt
+                * dt
+            )
         self.a += (np.average(self.v) * btarupt) / self.radius
         self.a = self.get_angle_diff(0)
 
@@ -102,9 +163,16 @@ class Simple_Robot:
         return (a_goal - self.a) - (2 * math.pi)
 
     def render(self, surface):
-        pos = Rect(self.x, self.y, 20, 20)
-        pos.center = (10 * self.x + 960, 10 * self.y + 540)
-        draw.rect(surface, "green", pos)
+
+        points = []
+        radius = math.sqrt((50 / 2) ** 2 + (50 / 2) ** 2)
+        angle = math.atan2(50 / 2, 50 / 2)
+        angles = [angle, -angle + math.pi, angle + math.pi, -angle]
+        for angle in angles:
+            y_offset = -1 * radius * math.sin(angle + self.a)
+            x_offset = radius * math.cos(angle + self.a)
+            points.append((10 * self.x + 960 + x_offset, 10 * self.y + 540 + y_offset))
+        draw.polygon(surface, "green", points)
 
     def update(self, coords, dt):
         # get new x and y value from model / robot odom
