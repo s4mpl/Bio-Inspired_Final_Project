@@ -8,6 +8,7 @@ from pygame.math import Vector2
 
 from circle import Circle
 from simulator import Simple_Robot
+from simulator import Spin_Robot
 
 SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 1080
@@ -27,6 +28,8 @@ def render_text(text: str):
 
 # spawn entities
 robot = Simple_Robot(0, 0, 0)
+spin = Spin_Robot(0, 0, 0)
+spin2 = Spin_Robot(0, 0, 0, "demo_files\\neat-checkpoint-9")
 goal = Circle((0, 0), (0, 0), (0, 0), 10, "red")
 
 target_position = (0, 0)
@@ -46,6 +49,14 @@ while running:
                 robot.y = 0
                 robot.v = [0, 0, 0, 0]
                 robot.a = 0
+                spin.x = 0
+                spin.y = 0
+                spin.v = [0, 0, 0, 0]
+                spin.a = 0
+            if event.key == pygame.K_LEFT:
+                target_angle -= 0.1
+            if event.key == pygame.K_RIGHT:
+                target_angle += 0.1
         if event.type == pygame.MOUSEBUTTONUP:
             target_position = (
                 (pygame.mouse.get_pos()[0] - 960) / 10,
@@ -60,9 +71,16 @@ while running:
     if paused:
         continue
 
-    goal._pos = Vector2(target_position[0], target_position[1])
-    robot.update(goal._pos, 20 * dt)
+    goal._pos = Vector2(
+        target_position[0],
+        target_position[1],
+    )
+    robot.update(target_position, target_angle, 20 * dt)
+    spin.update(target_position, target_angle, 20 * dt)
+    spin2.update(target_position, target_angle, 20 * dt)
 
+    spin.render(screen)
+    spin2.render(screen)
     robot.render(screen)
     goal.render(screen)
 

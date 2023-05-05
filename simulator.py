@@ -13,7 +13,7 @@ class Simple_Robot:
         self.y = y
         self.v = [0 for i in range(4)]
         self.a = (rand.random() * 2 * math.pi) if a == -1 else a
-        self.radius = 0.5
+        self.radius = 5
 
     def motor_drive(self, speeds):
         for i in range(len(self.v)):
